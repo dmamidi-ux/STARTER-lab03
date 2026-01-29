@@ -192,19 +192,15 @@ bool IntBST::remove(int value){
     if (!n) return false;
 
     if (!n->left && !n->right) {
-        if (!n->parent) {
-            root = nullptr;
-        } else {
-            if (n->parent->left == n) n->parent->left = nullptr;
-            else n->parent->right = nullptr;
-        }
+        if (!n->parent) root = nullptr;
+        else if (n->parent->left == n) n->parent->left = nullptr;
+        else n->parent->right = nullptr;
         delete n;
         return true;
     }
 
     if (!n->left || !n->right) {
         Node* child = (n->left) ? n->left : n->right;
-
         if (!n->parent) {
             root = child;
             child->parent = nullptr;
@@ -213,14 +209,18 @@ bool IntBST::remove(int value){
             else n->parent->right = child;
             child->parent = n->parent;
         }
-
         delete n;
         return true;
     }
 
-
     Node* pred = getPredecessorNode(value); 
-    n->info = pred->info;                     
-    remove(pred->info);                        
+    n->info = pred->info;                   
+
+    Node* child = pred->left; 
+    if (pred->parent->left == pred) pred->parent->left = child;
+    else pred->parent->right = child;
+    if (child) child->parent = pred->parent;
+
+    delete pred;
     return true;
 }
