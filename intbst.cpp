@@ -187,40 +187,31 @@ int IntBST::getSuccessor(int value) const{
 
 // deletes the Node containing the given value from the tree
 // returns true if the node exist and was deleted or false if the node does not exist
-bool IntBST::remove(int value){
+bool IntBST::remove(int value) {
     Node* n = getNodeFor(value, root);
     if (!n) return false;
 
-    if (!n->left && !n->right) {
-        if (!n->parent) root = nullptr;
-        else if (n->parent->left == n) n->parent->left = nullptr;
-        else n->parent->right = nullptr;
-        delete n;
-        return true;
-    }
+    auto removeNodeWith0or1Child = [&](Node* node) {
+        Node* child = node->left ? node->left : node->right;
+        if (!node->parent) { 
+            root = child;
+            if (child) child->parent = nullptr;
+        } else {
+            if (node->parent->left == node) node->parent->left = child;
+            else node->parent->right = child;
+            if (child) child->parent = node->parent;
+        }
+        delete node;
+    };
 
     if (!n->left || !n->right) {
-        Node* child = (n->left) ? n->left : n->right;
-        if (!n->parent) {
-            root = child;
-            child->parent = nullptr;
-        } else {
-            if (n->parent->left == n) n->parent->left = child;
-            else n->parent->right = child;
-            child->parent = n->parent;
-        }
-        delete n;
+        removeNodeWith0or1Child(n); 
         return true;
     }
 
-    Node* pred = getPredecessorNode(value); 
-    n->info = pred->info;                   
+    Node* succ = getSuccessorNode(n->info);
+    n->info = succ->info;
+    removeNodeWith0or1Child(succ);
 
-    Node* child = pred->left; 
-    if (pred->parent->left == pred) pred->parent->left = child;
-    else pred->parent->right = child;
-    if (child) child->parent = pred->parent;
-
-    delete pred;
     return true;
 }
