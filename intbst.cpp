@@ -190,22 +190,22 @@ int IntBST::getSuccessor(int value) const{
 bool IntBST::remove(int value){
     Node* n = getNodeFor(value, root);
     if (!n) return false;
+
     if (!n->left && !n->right) {
         if (!n->parent) {
             root = nullptr;
-        }
-        else {
-            Node* p = n->parent;
-            if (p->left == n) p->left = nullptr;
-            else p->right = nullptr;
+        } else {
+            if (n->parent->left == n) n->parent->left = nullptr;
+            else n->parent->right = nullptr;
         }
         delete n;
         return true;
     }
-    else if (!n->left || !n->right) {
+
+    if (!n->left || !n->right) {
         Node* child = (n->left) ? n->left : n->right;
 
-        if (!n->parent) { 
+        if (!n->parent) {
             root = child;
             child->parent = nullptr;
         } else {
@@ -214,23 +214,13 @@ bool IntBST::remove(int value){
             child->parent = n->parent;
         }
 
-        delete n; 
+        delete n;
         return true;
     }
-    else {
-        Node* pred = n->left;
-        while (pred->right) pred = pred->right;
 
-        n->info = pred->info;
 
-        Node* child = (pred->left) ? pred->left : nullptr;
-
-        if (pred->parent->left == pred) pred->parent->left = child;
-        else pred->parent->right = child;
-
-        if (child) child->parent = pred->parent;
-
-        delete pred;
-        return true;
-    }
+    Node* pred = getPredecessorNode(value); 
+    n->info = pred->info;                     
+    remove(pred->info);                        
+    return true;
 }
